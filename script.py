@@ -240,16 +240,16 @@ if uploaded_file is not None:
     
     fig_author = create_author_chart(df)
     
-    st.plotly_chart(fig_trend, theme=None)
-    st.plotly_chart(fig_covid_trend, theme=None)
-    st.plotly_chart(fig_day_of_week, theme=None)
-    st.plotly_chart(fig_author, theme=None)
+    st.plotly_chart(fig_trend)
+    st.plotly_chart(fig_covid_trend)
+    st.plotly_chart(fig_day_of_week)
+    st.plotly_chart(fig_author)
 
 
     # Análise de palavrões
     profanity_df = filter_profanity_messages(df)
     fig_profanity = create_profanity_chart(profanity_df)
-    st.plotly_chart(fig_profanity, theme=None)
+    st.plotly_chart(fig_profanity)
     
     # Mostrar o autor que mais fala palavrões
     top_profanity_author = profanity_df['author'].value_counts().idxmax()
