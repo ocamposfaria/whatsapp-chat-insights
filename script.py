@@ -59,6 +59,8 @@ def process_chat(file):
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%d/%m/%Y, %H:%M:%S")
     
     df = df[~df['message'].str.contains("figurinha omitida", case=False, na=False)]
+    df = df[~df['message'].str.contains("de ponta a ponta e ficam somente entre v", case=False, na=False)]
+    df = df[~df['message'].str.contains("de ponta a ponta e ficam somente entre v", case=False, na=False)]
 
     return df
 
