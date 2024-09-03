@@ -89,7 +89,7 @@ def create_covid_trend_chart(covid_df):
         monthly_count,
         x='year_month',
         y='count',
-        title='Quantidade de mensagens relacionadas à COVID-19 ao longo do tempo',
+        # title='Quantidade de mensagens relacionadas à COVID-19 ao longo do tempo',
         labels={'year_month': 'Ano-Mês', 'count': 'Quantidade de Mensagens'},
     )
 
@@ -107,7 +107,7 @@ def create_trend_chart(df):
         monthly_count,
         x='year_month',
         y='count',
-        title='Quantidade de mensagens ao longo do tempo',
+        # title='Quantidade de mensagens ao longo do tempo',
         labels={'year_month': 'Ano-Mês', 'count': 'Quantidade de Mensagens'},
     )
 
@@ -125,7 +125,7 @@ def create_day_of_week_chart(df):
         x='day_of_week',
         y='count',
         labels={'day_of_week': 'Dia da Semana', 'count': 'Quantidade de Mensagens'},
-        title='Quantidade de mensagens por dia da semana'
+        # title='Quantidade de mensagens por dia da semana'
     )
     return fig
 
@@ -137,7 +137,7 @@ def create_author_chart(df):
         x='author',
         y='count',
         labels={'author': 'Autor', 'count': 'Quantidade de Mensagens'},
-        title='Quantidade de mensagens por autor'
+        # title='Quantidade de mensagens por autor'
     )
     return fig
 
@@ -198,7 +198,7 @@ def create_profanity_chart(profanity_df):
         x='author',
         y='count',
         labels={'author': 'Autor', 'count': 'Quantidade de Palavrões'},
-        title='Quantidade de Palavrões por Autor'
+        # title='Quantidade de Palavrões por Autor'
     )
     return fig
 
@@ -240,15 +240,24 @@ if uploaded_file is not None:
     
     fig_author = create_author_chart(df)
     
+    st.subheader("Quantidade de mensagens ao longo do tempo")
     st.plotly_chart(fig_trend)
+
+    st.subheader("Quantidade de mensagens relacionadas à COVID-19 ao longo do tempo")
     st.plotly_chart(fig_covid_trend)
+
+    st.subheader("Quantidade de mensagens por dia da semana")
     st.plotly_chart(fig_day_of_week)
+
+    st.subheader("Quantidade de mensagens por autor")
     st.plotly_chart(fig_author)
 
 
     # Análise de palavrões
     profanity_df = filter_profanity_messages(df)
     fig_profanity = create_profanity_chart(profanity_df)
+
+    st.subheader("Quantidade de palavrões por autor")
     st.plotly_chart(fig_profanity)
     
     # Mostrar o autor que mais fala palavrões
