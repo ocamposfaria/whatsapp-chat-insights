@@ -104,14 +104,18 @@ def create_trend_chart(df):
     # Contando o número de mensagens por mês
     monthly_count = df.groupby('year_month').size().reset_index(name='count')
 
-    # Criando o gráfico de linha
-    fig = px.line(
+    # Criando o gráfico de dispersão com linha de tendência
+    fig = px.scatter(
         monthly_count,
         x='year_month',
         y='count',
         # title='Quantidade de mensagens ao longo do tempo',
         labels={'year_month': 'Ano-Mês', 'count': 'Quantidade de Mensagens'},
+        trendline='ols'  # Adicionando a linha de tendência
     )
+
+    # Convertendo para um gráfico de linha
+    fig.update_traces(mode='lines+markers')
 
     return fig
 
@@ -204,6 +208,37 @@ def create_profanity_chart(profanity_df):
     )
     return fig
 
+def create_profanity_ratio_chart(df, profanity_df):
+    # Contagem de mensagens por autor
+    author_message_count = df.groupby('author').size().reset_index(name='message_count')
+    
+    # Contagem de palavrões por autor
+    author_profanity_count = profanity_df.groupby('author').size().reset_index(name='profanity_count')
+    
+    # Mesclar os dois dataframes
+    merged_df = pd.merge(author_message_count, author_profanity_count, on='author', how='left')
+    
+    # Substituir NaN por 0 (caso algum autor não tenha palavrões)
+    merged_df['profanity_count'] = merged_df['profanity_count'].fillna(0)
+    
+    # Calcular a razão de palavrões por mensagem
+    merged_df['profanity_ratio'] = merged_df['profanity_count'] / merged_df['message_count']
+    
+    # Ordenar os autores pela razão de palavrões
+    merged_df = merged_df.sort_values(by='profanity_ratio', ascending=False)
+
+    # Criar o gráfico
+    fig = px.bar(
+        merged_df,
+        x='author',
+        y='profanity_ratio',
+        labels={'author': 'Autor', 'profanity_ratio': 'Razão de Palavrões/Mensagens'},
+        # title='Razão de Palavrões por Mensagem por Autor'
+    )
+    
+    return fig
+
+
 def list_most_common_profanities(profanity_df):
     profanity_keywords = [
         "caralho", "porra", "foder", "fuder",
@@ -227,8 +262,6 @@ uploaded_file = st.file_uploader("Choose a file")
 if uploaded_file is not None:
 
     lines = uploaded_file.readlines()
-
-    print(lines)
 
     df = process_chat(lines)
     
@@ -258,9 +291,13 @@ if uploaded_file is not None:
     # Análise de palavrões
     profanity_df = filter_profanity_messages(df)
     fig_profanity = create_profanity_chart(profanity_df)
+    fig_profanity_ratio = create_profanity_ratio_chart(df, profanity_df)
 
     st.subheader("Quantidade de palavrões por autor")
     st.plotly_chart(fig_profanity)
+
+    st.subheader("Razão entre quantidade de mensagens e quantidade palavrões por autor")
+    st.plotly_chart(fig_profanity_ratio)
     
     # Mostrar o autor que mais fala palavrões
     top_profanity_author = profanity_df['author'].value_counts().idxmax()
