@@ -278,6 +278,7 @@ st.title('Análise de Mensagens do Grupo de WhatsApp')
 
 st.markdown('##### Como usar?')
 st.markdown('Exporte a conversa de um grupo de WhatsApp, extraia o arquivo e suba o _chat.txt aqui!')
+st.markdown('Testado com WhatsApp no iOS 17+. Outras versões de OS e aplicativo podem não funcionar!')
 
 uploaded_file = st.file_uploader("Choose a file")
 if uploaded_file is not None:
