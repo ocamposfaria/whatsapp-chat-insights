@@ -29,7 +29,8 @@ def is_system_event(message):
         "mudou a imagem do grupo",
         "são protegidas com a criptografia de ponta a ponta",
         "foi adicionado(a)",
-        " saiu"
+        " saiu",
+        "figurinha omitida"
     ]
     return any(event in message.lower() for event in system_events)
 
@@ -75,12 +76,12 @@ def process_chat(file):
     # Convertendo a coluna 'timestamp' para o tipo datetime
     try:
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%d/%m/%Y %H:%M:%S")
+        df = df[~df['message'].str.contains("figurinha omitida", case=False, na=False)]
+        df = df[~df['author'].str.contains("você", case=False, na=False)]
     except ValueError:
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%d/%m/%Y, %H:%M:%S")
     
-    # Filtrar mensagens com conteúdo indesejado novamente, se necessário
-    df = df[~df['message'].str.contains("figurinha omitida", case=False, na=False)]
-    df = df[~df['author'].str.contains("você", case=False, na=False)]
+
 
     return df
 
