@@ -29,7 +29,7 @@ def is_system_event(message):
         "mudou a imagem do grupo",
         "são protegidas com a criptografia de ponta a ponta",
         "foi adicionado(a)",
-        "‎"
+        " saiu"
     ]
     return any(event in message.lower() for event in system_events)
 
