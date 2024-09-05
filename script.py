@@ -20,10 +20,21 @@ def parse_message(line):
         return timestamp, author, message
     return None, None, None
 
-def process_chat(file):
+def is_system_event(message):
+    # Detectar mensagens de eventos de sistema como "criou este grupo" ou "protegidas com a criptografia"
+    system_events = [
+        "criou este grupo", 
+        "mudou o nome do grupo para", 
+        "mudou a descrição do grupo", 
+        "mudou a imagem do grupo",
+        "são protegidas com a criptografia de ponta a ponta",
+        "foi adicionado(a)"
+    ]
+    return any(event in message.lower() for event in system_events)
 
+def process_chat(file):
     data = {"timestamp": [], "author": [], "message": []}
-    
+
     for line in file:
         line = line.decode('utf-8').strip()
 
@@ -34,16 +45,25 @@ def process_chat(file):
         timestamp, author, message = parse_message(line)
         
         if timestamp is None:
-            # Mensagens que não possuem autor (mensagens do sistema)
+            # Mensagens sem autor, podem ser continuação de mensagem anterior
             if len(data["message"]) > 0:
-                # Anexar à última mensagem (continuação)
-                data["message"][-1] += f" {line}"
+                # Verifica se a linha faz parte de uma pesquisa ou similar
+                if line.startswith("[") and ":" in line:
+                    data["message"][-1] += f" {line}"
+                else:
+                    # Caso seja continuação normal de texto
+                    data["message"][-1] += f" {line}"
             continue
         
-        # Filtrar mensagens contendo "figurinha omitida"
-        if "figurinha omitida" in message:
+        # Ignorar eventos de sistema
+        if is_system_event(message):
             continue
-
+        
+        # Ignorar mensagens contendo "figurinha omitida"
+        if "figurinha omitida" in message.lower():
+            continue
+        
+        # Adicionar dados extraídos ao DataFrame
         data["timestamp"].append(timestamp)
         data["author"].append(author)
         data["message"].append(message)
@@ -52,15 +72,14 @@ def process_chat(file):
     df = pd.DataFrame(data)
     
     # Convertendo a coluna 'timestamp' para o tipo datetime
-    # Tentando dois formatos diferentes
     try:
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%d/%m/%Y %H:%M:%S")
     except ValueError:
         df['timestamp'] = pd.to_datetime(df['timestamp'], format="%d/%m/%Y, %H:%M:%S")
     
+    # Filtrar mensagens com conteúdo indesejado novamente, se necessário
     df = df[~df['message'].str.contains("figurinha omitida", case=False, na=False)]
-    df = df[~df['message'].str.contains("de ponta a ponta e ficam somente entre v", case=False, na=False)]
-    df = df[~df['message'].str.contains("de ponta a ponta e ficam somente entre v", case=False, na=False)]
+    df = df[~df['author'].str.contains("você", case=False, na=False)]
 
     return df
 
@@ -296,7 +315,7 @@ if uploaded_file is not None:
     st.subheader("Quantidade de palavrões por autor")
     st.plotly_chart(fig_profanity)
 
-    st.subheader("Razão entre quantidade de mensagens e quantidade palavrões por autor")
+    st.subheader("Razão entre quantidade palavrões e quantidade de mensagens por autor")
     st.plotly_chart(fig_profanity_ratio)
     
     # Mostrar o autor que mais fala palavrões
